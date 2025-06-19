@@ -4,8 +4,11 @@ import fs from "fs";
 import http from "http";
 import https from "https";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+import authRoutes from "./routes/auth";
+import protectedRoutes from "./routes/protected";
 
-dotenv.config(); // Load .env variables
+dotenv.config();
 
 const app = express();
 const DIST_DIR = path.join(__dirname, "../dist");
@@ -14,6 +17,9 @@ const HTTPS_PORT = process.env.PORT || 443;
 const isProd = process.env.NODE_ENV === "production";
 
 app.use(express.json());
+app.use(cookieParser());
+app.use("/api/auth", authRoutes);
+app.use("/api/protected", protectedRoutes);
 
 // Sample API
 app.get("/api/ping", (_req, res) => {

@@ -6,10 +6,46 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id       Int      @id @default(autoincrement())
+  username String   @unique
+  password String
+  messages Message[]
+  chatRooms ChatRoomUser[]
+}
+
+model ChatRoom {
+  id        Int             @id @default(autoincrement())
+  name      String
+  createdAt DateTime        @default(now())
+  messages  Message[]
+  users     ChatRoomUser[]
+}
+
+model ChatRoomUser {
+  id         Int       @id @default(autoincrement())
+  user       User      @relation(fields: [userId], references: [id])
+  userId     Int
+  chatRoom   ChatRoom  @relation(fields: [chatRoomId], references: [id])
+  chatRoomId Int
+
+  @@unique([userId, chatRoomId]) // prevent duplicate membership
+}
+
+model Message {
+  id         Int       @id @default(autoincrement())
+  content    String
+  createdAt  DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id])
+  userId     Int
+  chatRoom   ChatRoom  @relation(fields: [chatRoomId], references: [id])
+  chatRoomId Int
 }
