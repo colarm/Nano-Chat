@@ -1,3 +1,4 @@
+// Search routes for users and chatrooms
 import { Router, Response, Request } from "express";
 import { PrismaClient } from "@prisma/client";
 

@@ -5,7 +5,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "secret"; // Use a strong secret in
 
 // Extend Request
 export interface AuthRequest extends Request {
-  userId?: string;
+  userId?: number;
 }
 
 export function requireAuth(
@@ -22,7 +22,7 @@ export function requireAuth(
 
   try {
     const payload = jwt.verify(token, JWT_SECRET) as { userId: string };
-    req.userId = payload.userId;
+    req.userId = Number(payload.userId);
     next();
   } catch (err) {
     res.status(401).json({ error: "Invalid token" });

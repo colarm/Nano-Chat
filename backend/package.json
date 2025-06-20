@@ -19,7 +19,8 @@
     "express": "^5.1.0",
     "hashids": "^2.3.0",
     "jsonwebtoken": "^9.0.2",
-    "nanoid": "^5.1.5"
+    "nanoid": "^5.1.5",
+    "socket.io": "^4.8.1"
   },
   "description": "",
   "devDependencies": {

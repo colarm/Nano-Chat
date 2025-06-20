@@ -1,3 +1,4 @@
+// Chat Room Management Routes
 import { Router, Response } from "express";
 import { requireAuth, AuthRequest } from "../middlewares/auth";
 import { PrismaClient } from "@prisma/client";
@@ -5,9 +6,9 @@ import { nanoid } from "nanoid";
 
 const prisma = new PrismaClient();
 const router = Router();
-router.use(requireAuth); // Apply authentication middleware to all routes in this router
+router.use(requireAuth);
 
-router.post("/", async (req: AuthRequest, res: Response): Promise<void> => {
+router.post("/", async (req: AuthRequest, res: Response) => {
   const { name } = req.body;
 
   if (!name || name.trim() === "") {
@@ -121,12 +122,161 @@ router.post("/invite", async (req: AuthRequest, res: Response) => {
 });
 
 router.post("/join/:inviteCode", async (req: AuthRequest, res: Response) => {
+  const { immidiate } = req.body;
   const inviteCode = req.params.inviteCode;
 
   if (!inviteCode || inviteCode.trim() === "") {
     res.status(400).json({ error: "Invite code is required" });
     return;
   }
+
+  const invite = await prisma.inviteCode.findUnique({
+    where: { code: inviteCode },
+    select: {
+      id: true,
+      chatRoomId: true,
+      userId: true,
+      active: true,
+    },
+  });
+
+  if (!invite) {
+    res.status(404).json({ error: "Invite code not found" });
+    return;
+  }
+
+  if (invite.active === false) {
+    res.status(400).json({ error: "Invite code is no longer active" });
+    return;
+  }
+
+  if (invite.userId === Number(req.userId)) {
+    res.status(400).json({ error: "You cannot join your own invite" });
+    return;
+  }
+
+  if (immidiate) {
+    const existingMembership = await prisma.chatRoomUser.findUnique({
+      where: {
+        userId_chatRoomId: {
+          userId: Number(req.userId),
+          chatRoomId: invite.chatRoomId,
+        },
+      },
+    });
+
+    if (existingMembership) {
+      res.status(400).json({ error: "You are already a member of this room" });
+      return;
+    }
+
+    await prisma.chatRoomUser.create({
+      data: {
+        userId: Number(req.userId),
+        chatRoomId: invite.chatRoomId,
+      },
+    });
+  }
+
+  await prisma.inviteCode.update({
+    where: { id: invite.id },
+    data: { active: false },
+  });
+
+  const room = await prisma.chatRoom.findUnique({
+    where: { id: invite.chatRoomId },
+    select: {
+      id: true,
+      name: true,
+      createdAt: true,
+    },
+  });
+
+  res.status(200).json({ invite, room });
+});
+
+router.get("/my", async (req: AuthRequest, res: Response) => {
+  const userId = Number(req.userId);
+  const rooms = await prisma.chatRoomUser.findMany({
+    where: { userId },
+    select: {
+      chatRoom: {
+        select: {
+          id: true,
+          name: true,
+          createdAt: true,
+        },
+      },
+    },
+  });
+  const formattedRooms = rooms.map((membership) => membership.chatRoom);
+  res.status(200).json({ rooms: formattedRooms });
+});
+
+router.get("/:roomId", async (req: AuthRequest, res: Response) => {
+  const roomId = Number(req.params.roomId);
+
+  if (!roomId || isNaN(roomId)) {
+    res.status(400).json({ error: "Invalid room ID" });
+    return;
+  }
+
+  const room = await prisma.chatRoom.findUnique({
+    where: { id: Number(roomId) },
+    select: {
+      id: true,
+      name: true,
+      createdAt: true,
+      users: {
+        select: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+            },
+          },
+        },
+      },
+    },
+  });
+  if (!room) {
+    res.status(404).json({ error: "Chat room not found" });
+    return;
+  }
+  res.status(200).json({ room });
+});
+
+// Leave a chat room
+router.post("/leave/:roomId", async (req: AuthRequest, res: Response) => {
+  const roomId = Number(req.params.roomId);
+  const userId = Number(req.userId);
+
+  if (!roomId || isNaN(roomId)) {
+    res.status(400).json({ error: "Invalid room ID" });
+    return;
+  }
+
+  const membership = await prisma.chatRoomUser.findUnique({
+    where: {
+      userId_chatRoomId: {
+        userId,
+        chatRoomId: roomId,
+      },
+    },
+  });
+
+  if (!membership) {
+    res.status(404).json({ error: "You are not a member of this chat room" });
+    return;
+  }
+
+  await prisma.chatRoomUser.delete({
+    where: {
+      id: membership.id,
+    },
+  });
+
+  res.status(200).json({ message: "Successfully left the chat room" });
 });
 
 export default router;
