@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "secret"; // Use a strong secret in production
 
-// 扩展 Request 类型
+// Extend Request
 export interface AuthRequest extends Request {
   userId?: string;
 }

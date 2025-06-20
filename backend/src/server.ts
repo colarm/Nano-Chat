@@ -6,7 +6,9 @@ import https from "https";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth";
-import protectedRoutes from "./routes/protected";
+import userRoutes from "./routes/user";
+import searchRoutes from "./routes/search";
+import chatroomRoutes from "./routes/chatroom";
 
 dotenv.config();
 
@@ -19,7 +21,9 @@ const isProd = process.env.NODE_ENV === "production";
 app.use(express.json());
 app.use(cookieParser());
 app.use("/api/auth", authRoutes);
-app.use("/api/protected", protectedRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/search", searchRoutes);
+app.use("/api/chatroom", chatroomRoutes);
 
 // Sample API
 app.get("/api/ping", (_req, res) => {

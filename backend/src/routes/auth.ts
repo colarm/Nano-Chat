@@ -37,11 +37,16 @@ interface AuthBody {
 // Register route
 router.post(
   "/register",
-  async (req: Request<{}, {}, AuthBody>, res: Response): Promise<void> => {
+  async (req: Request, res: Response) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
       res.status(400).json({ error: "Username and password required" });
+      return;
+    }
+
+    if (username !== username.toLowerCase()) {
+      res.status(400).json({ error: "Username must be lowercase only" });
       return;
     }
 
@@ -68,7 +73,7 @@ router.post(
 // Login route
 router.post(
   "/login",
-  async (req: Request<{}, {}, AuthBody>, res: Response): Promise<void> => {
+  async (req: Request, res: Response) => {
     const { username, password } = req.body;
 
     const user = await prisma.user.findUnique({ where: { username } });
