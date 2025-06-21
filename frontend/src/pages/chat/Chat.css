@@ -3,6 +3,65 @@
   padding: 0;
 }
 
+/* Chatroom List Specific Styles */
+.chatroom-card {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  background-color: #f9f8fd;
+  padding: 1rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(92, 81, 165, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.chatroom-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(92, 81, 165, 0.2);
+}
+
+.chatroom-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.chatroom-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatroom-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #444;
+}
+
+.chatroom-meta {
+  font-size: 0.85rem;
+  color: #777;
+}
+
+.chatroom-join-btn {
+  background-color: #5c51a5;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.chatroom-join-btn:hover {
+  background-color: #7464dc;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
 .chat-container {
   display: flex;
   flex-direction: column;

@@ -2,31 +2,34 @@ import "./Login.css";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function Login() {
+function Register() {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccess(false);
 
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username: username.toLowerCase(), password }),
       });
 
       if (res.ok) {
-        navigate("/chatroomList");
+        setSuccess(true);
+        setTimeout(() => navigate("/login"), 1500);
       } else {
         const data = await res.json();
-        setError(data.message || "Login failed");
+        setError(data.message || "Registration failed");
       }
     } catch (err) {
       setError("Network error");
@@ -35,7 +38,7 @@ function Login() {
 
   return (
     <div className="login-container">
-      <h2>Log In</h2>
+      <h2>Register</h2>
       <hr />
       <form onSubmit={handleSubmit}>
         <div className="form-row">
@@ -44,7 +47,7 @@ function Login() {
             type="text"
             id="username"
             value={username}
-            onChange={(e) => setUsername(e.target.value.toLowerCase())}
+            onChange={(e) => setUsername(e.target.value)}
             required
           />
         </div>
@@ -59,14 +62,17 @@ function Login() {
           />
         </div>
         {error && <p className="error">{error}</p>}
-        <button type="submit">Log In</button>
+        {success && (
+          <p className="success">Registered successfully! Redirecting...</p>
+        )}
+        <button type="submit">Register</button>
       </form>
       <button
         type="button"
         className="sub-button"
-        onClick={() => navigate("/register")}
+        onClick={() => navigate("/login")}
       >
-        Don't have an account? Register
+        Already have an account? Log In
       </button>
       <button
         type="button"
@@ -79,4 +85,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Register;

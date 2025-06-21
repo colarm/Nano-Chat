@@ -7,4 +7,4 @@ cd ../backend
 rmdir /s /q dist
 mkdir dist
 xcopy "..\frontend\dist" "./dist" /s /e
-node server.js
+npm run dev

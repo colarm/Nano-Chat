@@ -89,9 +89,14 @@
   box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
 }
 
-.back {
+.login-container .sub-button {
   color: #717171;
   margin: 1rem 0 0;
+}
+
+.login-container .sub-button:hover {
+  color: #595765;
+  text-decoration: underline;
 }
 
 @media (max-width: 768px) {
