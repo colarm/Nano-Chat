@@ -1,45 +1,123 @@
-# 💬 NanoChat - Full-Stack React + Node Chat App
+# Nano-Chat
 
-**NanoChat** is a lightweight, full-stack chat application built with **React**, **Node.js**, and **MySQL (via Prisma ORM)**. It supports user registration, login, invite-based room joining, and real-time-like chat interactions.
+Nano-Chat is a modern full-stack chat application built with:
+
+* **Frontend**: React (Vite) with TypeScript
+* **Backend**: Express + Prisma (MySQL)
+* **Real-time**: Socket.IO for WebSocket communication
+
+It features user authentication, protected APIs, chatroom creation/invitation, real-time message delivery, and a component-based frontend interface.
 
 ---
 
 ## 📁 Project Structure
 
-```
-Nano-Chat/
-├── frontend/                 # React App (Vite)
-│   ├── src/
-│   │   ├── assets/           # Static images, icons, etc.
-│   │   ├── components/       # Shared reusable components
-│   │   ├── functions/        # Utility functions
-│   │   ├── pages/            # Route-based views
-│   │   │   ├── chat/
-│   │   │   └── login/
-│   │   ├── App.tsx           # App routes & layout
-│   │   ├── main.tsx          # Entry point (ReactDOM)
-│   │   ├── index.css         # Global styles
-│   │   └── App.css           # App-level styling
-│   ├── index.html            # Root HTML
-│   ├── package.json          # Frontend dependencies
-│   └── vite.config.ts        # Vite config
-│
-├── backend/                  # Node.js + Prisma API
-│   ├── prisma/               # Prisma schema + migrations
-│   │   └── schema.prisma
-│   ├── src/
-│   │   └── server.ts         # Main server entry
-│   ├── .env                  # DB config (MySQL)
-│   ├── package.json
-│   ├── tsconfig.json
-│   └── nodemon.json
-```
+### Backend (`/backend`)
+
+* `prisma/`: Prisma schema and migrations
+* `src/`
+
+  * `middlewares/`: JWT-based authentication logic
+  * `routes/`: REST API routes for auth, users, chatrooms, search, and messages
+  * `utils/`: Helper utilities like password hashing
+  * `socket.ts`: Socket.IO event handling
+  * `server.ts`: Express app initialization
+* `.env`: Environment variables
+* `package.json`, `tsconfig.json`: Backend configs
+
+### Frontend (`/frontend`)
+
+* `public/`: Static public assets
+* `src/`
+
+  * `assets/`: Images and static frontend content
+  * `components/`: Reusable React components
+  * `functions/`: Hooks and utilities (e.g., API fetchers)
+  * `pages/`
+
+    * `login/`: Login screen (`Login.tsx`, `Login.css`)
+    * `chat/`: Chat interface (`Chat.tsx`, `Chat.css`)
+  * `App.tsx`, `main.tsx`: Application entry
+* `index.html`: HTML shell
+* `vite.config.ts`, `tsconfig.*.json`: Vite and TypeScript configs
+
+---
+
+## 🔐 Backend API Overview
+
+### Authentication
+
+* `POST /api/auth/register` – Register a new user (usernames are stored in lowercase)
+* `POST /api/auth/login` – Login with credentials (JWT cookie)
+* `POST /api/auth/logout` – Logout and invalidate session
+
+### User & Search
+
+* `GET /api/user/me` – Get logged-in user details
+* `GET /api/search/users?q=` – Search users by name
+* `GET /api/search/chatroom?q=` – Search chatrooms by name
+
+### Chatroom Management
+
+* `POST /api/chatroom` – Create a new chatroom
+* `GET /api/chatroom/my` – List user’s chatrooms
+* `GET /api/chatroom/:id` – Get specific chatroom details
+* `POST /api/chatroom/invite` – Generate invite link
+* `POST /api/chatroom/join/:inviteCode` – Join a chatroom
+* `POST /api/chatroom/leave/:id` – Leave a chatroom
+
+### Messaging
+
+* `POST /api/message` – Send message to a room
+* `GET /api/message/:roomId` – Fetch messages from a room
+
+---
+
+## 🔌 Real-Time Communication
+
+* Built using **Socket.IO**
+* Events handled in `src/socket.ts` include:
+
+  * `joinRoom`
+  * `leaveRoom`
+  * `chatMessage`
+  * `messageReceived`
+
+WebSocket server is bootstrapped in `server.ts`.
+
+---
+
+## 🧠 Database Schema Highlights
+
+Models defined in Prisma:
+
+* `User`: Holds credentials and metadata
+* `ChatRoom`: Named conversation spaces
+* `ChatRoomUser`: Tracks membership
+* `InviteCode`: Unique codes for joining rooms
+* `Message`: Stores chat messages
 
 ---
 
 ## 🚀 Getting Started
 
-### Frontend
+### Backend Setup
+
+```bash
+cd backend
+npm install
+npx prisma migrate dev --name init
+npm run dev
+```
+
+`.env` sample:
+
+```
+DATABASE_URL="mysql://user:password@localhost:3306/nanochat"
+JWT_SECRET="your-secret"
+```
+
+### Frontend Setup
 
 ```bash
 cd frontend
@@ -47,109 +125,34 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+Frontend will run on `http://localhost:5173` (default Vite port).
 
 ---
 
-### Backend (API + DB)
+## ✅ Status & Roadmap
 
-```bash
-cd backend
-npm install
-
-# setup your .env file
-cp .env.example .env
-# edit the file and set your MySQL credentials
-
-# Generate DB tables
-npx prisma migrate dev --name init
-
-# Start server
-npm run dev
-```
-
-> Make sure your MySQL container is running.
+* ✔ Auth with JWT and cookies
+* ✔ REST API for user, chatroom, and messaging
+* ✔ WebSocket real-time messaging
+* ✔ Vite + React UI with modular components
+* ☐ UI/UX enhancements
+* ☐ Responsive mobile support
+* ☐ Deployment setup (Docker, CI/CD)
 
 ---
 
-## 🗺️ Route Map (Frontend)
+## 🔍 Testing
 
-| Path                        | Description                                      |
-| --------------------------- | ------------------------------------------------ |
-| `/login`                    | Login screen                                     |
-| `/register`                 | Registration screen                              |
-| `/home`                     | Main user dashboard                              |
-| `/chat/:chatId`             | Chat room UI                                     |
-| `/invite?room=abc&code=xyz` | Join room via invite                             |
-| `*`                         | Fallback → 404                                   |
+Use [Postman](https://www.postman.com/) for API validation. Official collection:
+
+**Postman Collection**:
+[Link](https://colarm.postman.co/workspace/Colarm's-Workspace~c7899962-725a-41ed-8c22-e5b24b6bb1cb/collection/46013464-d05d42ee-0ed6-422a-90eb-c8738e8d5bc3)
 
 ---
 
-## 🔐 Auth Logic
+## ℹ️ Notes
 
-- Auth state stored in `localStorage`
-- Managed via React Context (`AppContext.js`)
-- Protected routes auto-redirect to `/login`
-
----
-
-## 🧪 Tests
-
-```bash
-npm test      # frontend
-```
-
----
-
-## 🔧 Backend Tech
-
-- Node.js + Express
-- Prisma ORM + MySQL
-- TypeScript
-- dotenv for config
-
----
-
-## 🛠️ Frontend Tech
-
-- React 18 + React Router
-- Vite (dev/build tooling)
-- Context API
-- Plain CSS (modular structure)
-
----
-
-## ✅ Features In Progress
-
-- [ ] Persistent chat history (currently local only)
-- [ ] User avatars / status indicators
-- [ ] Invite via shareable link
-- [ ] Prisma-based message model & saving
-- [ ] Chat UX improvements (autoscroll, emoji, etc.)
-
----
-
-## 📦 Docker Support
-
-You can spin up a MySQL container with:
-
-```bash
-docker run -d \
-  --name nanochatdb \
-  -e MYSQL_ROOT_PASSWORD=123456 \
-  -e MYSQL_DATABASE=nanochat \
-  -p 3306:3306 \
-  mysql
-```
-
----
-
-## 📚 Prisma Commands
-
-```bash
-npx prisma generate       # generate client
-npx prisma studio         # open browser UI
-npx prisma migrate dev    # apply schema to DB
-npx prisma db pull        # introspect existing DB
-```
-
+* All usernames are lowercase
+* Invite codes are URL-safe (generated with `nanoid`)
+* Prisma manages all database interaction
+* Project is actively maintained

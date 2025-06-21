@@ -23,6 +23,9 @@ export function requireAuth(
   try {
     const payload = jwt.verify(token, JWT_SECRET) as { userId: string };
     req.userId = Number(payload.userId);
+    if (isNaN(req.userId)) {
+      throw new Error("Invalid user ID");
+    }
     next();
   } catch (err) {
     res.status(401).json({ error: "Invalid token" });
